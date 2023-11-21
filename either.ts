@@ -36,6 +36,9 @@ export const map: {
   <T, U>(fn: (value: T) => U): <E>(either: Either<E, T>) => Either<E, U>;
 } = dual(2, _map);
 
+export const flatten = <E2, E, T>(either: Either<E2, Either<E, T>>): Either<E | E2, T> =>
+  isRight(either) ? either.right : either;
+
 const _flatMap = <E, T, E2, U>(
   either: Either<E, T>,
   fn: (value: T) => Either<E2, U>
