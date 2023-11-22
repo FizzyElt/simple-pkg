@@ -1,5 +1,6 @@
 import { rightTag, leftTag } from './symbol';
 import { dual } from './function';
+import { Option, isSome } from './option';
 
 export type Right<T> = {
   readonly _tag: Symbol;
@@ -17,10 +18,18 @@ export const right = <E = never, T = never>(value: T): Either<E, T> => ({
   _tag: rightTag,
   right: value,
 });
-export const left = <E = never, T = never>(value: T): Either<E, T> => ({
+export const left = <E = never, T = never>(value: E): Either<E, T> => ({
   _tag: leftTag,
-  right: value,
+  left: value,
 });
+
+const _fromNullable = <E, T>(value: T, onNull: () => E): Either<E, NonNullable<T>> =>
+  value === undefined || value === null ? left(onNull()) : right(value);
+
+export const fromNullable: {
+  <E, T>(value: T, onNull: () => E): Either<E, NonNullable<T>>;
+  <E>(onNull: () => E): <T>(value: T) => Either<E, NonNullable<T>>;
+} = dual(2, _fromNullable);
 
 export const of = right;
 
@@ -71,3 +80,11 @@ export const match: {
     either: Either<E, T>
   ) => U | U2;
 } = dual(2, _match);
+
+const _fromOption = <E, T>(option: Option<T>, onLeft: () => E): Either<E, T> =>
+  isSome(option) ? right(option.value) : left(onLeft());
+
+export const fromOption: {
+  <E, T>(option: Option<T>, onLeft: () => E): Either<E, T>;
+  <E>(onLeft: () => E): <T>(option: Option<T>) => Either<E, T>;
+} = dual(2, _fromOption);

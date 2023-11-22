@@ -368,3 +368,13 @@ export const dual: {
       };
   }
 };
+
+export const compose: {
+  <A, B, C>(ab: (v: A) => B, bc: (v: B) => C): (v: A) => C;
+  <B, C>(bc: (v: B) => C): <A>(ab: (v: A) => B) => (v: A) => C;
+} = dual(
+  2,
+  <A, B, C>(ab: (v: A) => B, bc: (v: B) => C) =>
+    (v: A): C =>
+      bc(ab(v))
+);

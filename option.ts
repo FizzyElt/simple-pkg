@@ -1,5 +1,6 @@
-import { dual } from './function';
 import { someTag, noneTag } from './symbol';
+import { dual } from './function';
+import { Either, isRight } from './either';
 
 export type None = {
   readonly _tag: Symbol;
@@ -22,6 +23,9 @@ export const none = <T = never>(): Option<T> => ({
 });
 
 export const of = some;
+
+export const fromNullable = <T>(nullableValue: T): Option<NonNullable<T>> =>
+  nullableValue === null || nullableValue === undefined ? none() : some(nullableValue);
 
 export const isSome = <T>(option: Option<T>): option is Some<T> => option._tag === someTag;
 
@@ -63,3 +67,6 @@ export const match: {
   <T, A, B>(option: Option<T>, options: { onSome: (value: T) => A; onNone: () => B }): A | B;
   <T, A, B>(options: { onSome: (value: T) => A; onNone: () => B }): (option: Option<T>) => A | B;
 } = dual(2, _match);
+
+export const fromEither = <E, T>(either: Either<E, T>): Option<T> =>
+  isRight(either) ? some(either.right) : none();
